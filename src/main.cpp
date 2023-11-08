@@ -156,6 +156,7 @@ void updatePercentStatus()
 
     int httpCode = http.POST(output);
     Serial.println("Estou dando o update");
+    Serial.println(output);
 
     if (httpCode == HTTP_CODE_OK)
     {
@@ -210,6 +211,9 @@ void updateProgressStatus(bool progressPaintStatus)
   }
 }
 
+/**
+ * Função para mover motores para frente
+ * */
 void moveMotorForward()
 {
   digitalWrite(motor1Pin2, 0);
@@ -219,7 +223,9 @@ void moveMotorForward()
   digitalWrite(motor2Pin1, 0);
 }
 
-// Função para mover um motor para trás
+/**
+ * Função para mover motores para trás
+ * */
 void moveMotorBackward()
 {
   digitalWrite(motor1Pin2, 1);
@@ -229,20 +235,36 @@ void moveMotorBackward()
   digitalWrite(motor2Pin1, 1);
 }
 
+/**
+ * Função para mover um motor para cima
+ * */
 void moveMotorUpward()
 {
   digitalWrite(motor3Pin2, 0);
   digitalWrite(motor3Pin1, 1);
 }
 
-// Função para mover um motor para trás
+/**
+ * Função para mover um motor para baixo
+ * */
 void moveMotorDownward()
 {
   digitalWrite(motor3Pin2, 1);
   digitalWrite(motor3Pin1, 0);
 }
 
-// Função para parar um motor
+/**
+ * Função para para o motor do spray
+ * */
+void stopSprayMotor()
+{
+  digitalWrite(motor3Pin2, 0);
+  digitalWrite(motor3Pin1, 0);
+}
+
+/**
+ * Função para parar um motor
+ * */
 void stopMotor()
 {
   digitalWrite(motor1Pin1, 0);
@@ -252,10 +274,17 @@ void stopMotor()
   digitalWrite(motor2Pin2, 0);
 }
 
+/**
+ * Função para parar o spray
+ * */
 void stopSpray()
 {
   digitalWrite(sparyPin1, 0);
 }
+
+/**
+ * Função para iniciar o spray
+ * */
 void startSpray()
 {
   digitalWrite(sparyPin1, 1);
@@ -303,7 +332,6 @@ void paintWall()
         // Ida: Mover para frente pintando
         if (isPaintPaused == false)
         {
-
           startSpray();
           moveMotorForward();
           delay(tempoParaCobrirLargura);
@@ -314,15 +342,6 @@ void paintWall()
           stopMotor();
           return;
         }
-
-        // if (vert < numSegmentosVerticais - 1)
-        // { // Se não for a última passagem vertical
-        // Subida: Mover spray para cima
-        // stopMotor();
-        // moveMotorUpward();
-        // delay(1900);
-        // stopSpray();
-        // // }
 
         // Volta: Mover para trás pintando
         if (isPaintPaused == false)
@@ -342,8 +361,10 @@ void paintWall()
         {
           stopSpray();
           stopMotor();
+
           moveMotorUpward();
           delay(3500);
+          stopSprayMotor();
         }
         else
         {
@@ -368,8 +389,8 @@ void paintWall()
 
       updateProgressStatus(false);
       moveMotorDownward();
-      delay(3500 * vert);
-
+      delay((3500 * vert) - 1000);
+      stopSprayMotor();
       return;
     }
     else
@@ -387,7 +408,7 @@ void paintWall()
   }
 }
 
-void playSpray()
+void playPaint()
 {
   if (isPaintPaused == true || isAProgressPainting == false)
   {
@@ -408,7 +429,7 @@ void loop2(void *parameter)
     // Adicione a verificação para isAProgressPainting aqui
     if (isAProgressPainting == true)
     {
-      playSpray();
+      playPaint();
     }
     else
     {
@@ -425,15 +446,15 @@ void loop3(void *parameter)
     fetchRobot();
     fetchPaint();
 
-    // playSpray();
     delay(500);
   }
 }
+
 void loop4(void *parameter)
 {
   for (;;)
   {
-    if (shouldUpdatePercentStatus == true)
+    if (shouldUpdatePercentStatus)
     {
       updatePercentStatus();
     }
